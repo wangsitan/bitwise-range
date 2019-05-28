@@ -3,39 +3,29 @@ from __future__ import print_function
 import json
 
 
-''''
-1000 <= tcp_dst <= 1999
-
-0000001111101000
-0000011111001111
-
-0000001111101xxx
-000000111111xxxx
-0000010xxxxxxxxx
-00000110xxxxxxxx
-000001110xxxxxxx
-0000011110xxxxxx
-000001111100xxxx
-
-tcp,tp_src=0x03e8/0xfff8
-tcp,tp_src=0x03f0/0xfff0
-tcp,tp_src=0x0400/0xfe00
-tcp,tp_src=0x0600/0xff00
-tcp,tp_src=0x0700/0xff80
-tcp,tp_src=0x0780/0xffc0
-tcp,tp_src=0x07c0/0xfff0
-'''
-
-
 
 class BitwiseRange(object):
     """
+    Express a range of number as a collection of bitwise stuff.
     """
 
-    def __init__(self, A, B, bits):
+    def __init__(self, A, B, bits=0):
+        """
+        Args:
+            <int> A: the smallest number in the range.
+            <int> B: the biggest number in the range.
+            [int] bits: max bits of a number, use (len(bin(B)) - 2) if not given.
+        """
+
         self.A = A
         self.B = B
-        self.total_bits = bits
+
+        if bits:
+            self.total_bits = bits
+        else:
+            # bin(777) is '0b1100001001'
+            self.total_bits = len(bin(B)) - 2
+
         self.sA = self._str(A)  # '0000001111101000'
         self.sB = self._str(B)  # '0000011111001111'
 
@@ -45,6 +35,10 @@ class BitwiseRange(object):
 
 
     def _handle(self):
+        """
+        Handle some special conditions here.
+        """
+
         # A > B
         if self.A > self.B:
             return
@@ -65,60 +59,59 @@ class BitwiseRange(object):
             self._append_res(self.B, 0)
             return
 
-        # from first_diff_index, A all 0 and B all 1, a big result
+        # from first_diff_index, A is all 0 and B is all 1. a big result
         if '1' not in self.sA[self.first_diff_index:] and \
             '0' not in self.sB[self.first_diff_index:]:
             self._append_res(self.A, self.total_bits - self.first_diff_index)
             return
 
-        # 2 parts, a_top: all bits after first_diff_index is 1
-        #self.a_top = 2 ** (self.total_bits - self.first_diff_index - 1) - 1  # 0000001111111111
+        # split into 2 parts: A -> a_top, b_bottom -> B
+        #   a_top: the bit on first_diff_index is 0, all bits after first_diff_index is 1.
+        #   b_bottom: the bit on first_diff_index is 1, all bits after first_diff_index is 0.
         sa_top = self.sA[0:self.first_diff_index+1] + '1' * (self.total_bits - self.first_diff_index - 1)
         self.a_top = int(sa_top, base=2)
-        self.b_bottom = self.a_top + 1                                       # 0000010000000000
+        self.b_bottom = self.a_top + 1
 
         self._part1()
         self._part2()
 
 
     def _str(self, n):
+        """
+        Transform integer to binary str.
+        """
         return "{0:0{1}b}".format(n, self.total_bits)
 
 
-    # temp
-    '''
-    def _append_res(self, numStr, freeBits):
-        """
-        '0000001111101000'  len: 16
-        3
-        """
-
-        s = numStr[0:(self.total_bits-freeBits)] + 'x' * freeBits
-        self.res_list.append(s)
-    '''
     def _append_res(self, num, freeBits):
+        """
+        Add result to the result list.
+        """
         self.res_list.append((num, freeBits))
 
 
     def _part1(self):
+        """
+        Handle A -> a_top.
+        a_top: the bit on first_diff_index is 0, all bits after first_diff_index is 1.
+        """
+
         a = self.A
         s = self._str(a)
 
-
-        # special: A == 0, cannot do rindex('1')
+        # special: A == 0
         if a == 0:
             freeBits = self.total_bits - self.first_diff_index - 1
             self._append_res(a, freeBits)
             return  # end
 
-
-        # TODO: in common way
+        # NOTE: can be handled in common loop, but this is OK.
         if s.endswith('1'):
             self._append_res(a, 0)
             a += 1
             s = self._str(a)
 
-
+        # loop: look from low bit to high bit
         while True:
             if a > self.a_top:
                 break
@@ -135,14 +128,17 @@ class BitwiseRange(object):
 
 
     def _part2(self):
-        b = self.b_bottom  # 0000010000000000
-        s = self._str(b)
+        """
+        Handle b_bottom -> B.
+        b_bottom: the bit on first_diff_index is 1, all bits after first_diff_index is 0.
+        """
 
-        # '0000010000000000'
-        # '0000011111001111'
+        b = self.b_bottom
+        s = self._str(b)
 
         index = self.first_diff_index + 1
 
+        # loop: look from high bit to low bit
         while True:
             if index >= self.total_bits:
                 break
@@ -163,7 +159,7 @@ class BitwiseRange(object):
                 b += 2 ** (self.total_bits - index - 1)
                 s = self._str(b)
                 index += 1
-            else:  # sB[index] is '0'
+            else:  # sB[index] == '0'
                 index += 1
 
 
@@ -173,17 +169,18 @@ class BitwiseRange(object):
 
 
     def print_result_x(self):
+        """
+        Print result like '000001111100xxxx'.
+        """
         for (num, freeBits) in self.res_list:
             s = self._str(num)[0:(self.total_bits-freeBits)] + 'x' * freeBits
             print(s)
 
 
     def print_result_hex(self):
-        #if self.total_bits % 4 != 0:
-        #    raise Exception("total_bits % 4 != 0")
-
-        #chars = self.total_bits / 4
-
+        """
+        Print result like '0x780/0xffc0'.
+        """
         for (num, freeBits) in self.res_list:
             maskStr = '1' * (self.total_bits - freeBits) + '0' * freeBits
             mask = int(maskStr, base=2)
@@ -192,25 +189,22 @@ class BitwiseRange(object):
 
 
 
-
-
-
-
 class BitwiseIPv4Range(BitwiseRange):
     """
+    Express a range of ipv4 addr as a collection of subnet.
     """
 
     def __init__(self, ipA, ipB):
+        """
+        Args:
+            <str> ipA, ipB: such as "10.0.1.5", "10.0.2.100".
+        """
+
         self.A = self._ipv4_to_int(ipA)
         self.B = self._ipv4_to_int(ipB)
         self.total_bits = 32
-        self.sA = self._str(self.A)  # '0000001111101000'
-        self.sB = self._str(self.B)  # '0000011111001111'
-
-        #print(self.A)
-        #print(self.B)
-        #print(self.sA)
-        #print(self.sB)
+        self.sA = self._str(self.A)
+        self.sB = self._str(self.B)
 
         self.res_list = []
 
@@ -218,6 +212,10 @@ class BitwiseIPv4Range(BitwiseRange):
 
 
     def _ipv4_to_int(self, s):
+        """
+        "0.0.1.1" -> 257
+        """
+
         l = s.split('.')
         num = (int(l[0]) << 24) + \
               (int(l[1]) << 16) + \
@@ -228,8 +226,9 @@ class BitwiseIPv4Range(BitwiseRange):
 
 
     def print_result_ipv4(self):
-        #if self.total_bits != 32:
-        #    raise Exception("total_bits != 32")
+        """
+        Print result like '10.0.2.96/30'.
+        """
 
         for (num, freeBits) in self.res_list:
             maskStr = '1' * (self.total_bits - freeBits) + '0' * freeBits
@@ -245,20 +244,15 @@ class BitwiseIPv4Range(BitwiseRange):
 
 
 
-
 def test():
-    #print(_ipv4_to_int("0.0.0.1"))
-
     #r = BitwiseRange(1000, 1999, 16)
-
+    #r = BitwiseRange(1000, 1999)
     #r = BitwiseRange(1000, 1001, 16)
-    r = BitwiseRange(0b000,
-                     0b111, 3)
-
+    #r = BitwiseRange(0b000, 0b111, 3)
     #r.print_result_x()
     #r.print_result_hex()
 
-    r = BitwiseIPv4Range("0.0.0.0", "0.0.255.255")
+    r = BitwiseIPv4Range("10.0.1.0", "10.0.2.100")
     r.print_result_ipv4()
 
 
