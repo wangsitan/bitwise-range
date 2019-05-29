@@ -55,6 +55,8 @@ There is also an encapsulation for IPv4 address range.
 ## example
 
 ```
+>>> from bitwise_range import BitwiseRange, BitwiseIPv4Range
+
 >>> BitwiseRange(0b0100, 0b1110, 4).print_result_x()
 01xx
 10xx
