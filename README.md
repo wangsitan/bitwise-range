@@ -1,14 +1,18 @@
 # bitwise-range
 
+OpenFlow and Open vSwitch support bitwise match on individual fields, but don't support range match directly.
 
-OpenFlow and Open vSwitch support bitwise match on individual fields, but don't support range match.
-
+`man ovs-fields`:  
 > Range matches can be expressed as a collection of bitwise matches.
 
-This piece of code works for this. It transforms a range of number into a set of bitwise stuff.
+This piece of code works for this. It transforms a range of number (nonnegative integer) into a set of bitwise stuff. The number of results is designed to be as few as possible.
+
+There is also an encapsulation for IPv4 address range.
 
 
-ovs-fields manual:
+
+## corresponding content in ovs-fields manual
+
 ```
     Some  types of matches on individual fields cannot be expressed directly with OpenFlow and
     Open vSwitch. These can be expressed indirectly.
@@ -24,7 +28,6 @@ ovs-fields manual:
             01111101000
             11111001111
 
-
             The following series of bitwise matches will match 1000 and 1999 and all the
             values in between:
 
@@ -35,7 +38,6 @@ ovs-fields manual:
             1110xxxxxxx
             11110xxxxxx
             1111100xxxx
-
 
             which can be written as the following matches:
 
@@ -50,7 +52,7 @@ ovs-fields manual:
 
 
 
-## Example
+## example
 
 ```
 >>> BitwiseRange(0b0100, 0b1110, 4).print_result_x()
@@ -84,6 +86,5 @@ ovs-fields manual:
 10.0.2.96/30
 10.0.2.100/32
 ```
-
 
 

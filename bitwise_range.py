@@ -6,7 +6,7 @@ import json
 
 class BitwiseRange(object):
     """
-    Express a range of number as a set of bitwise stuff.
+    Express a range of nonnegative integer as a set of bitwise stuff.
     The number of results is designed to be as few as possible.
     """
 
