@@ -6,7 +6,8 @@ import json
 
 class BitwiseRange(object):
     """
-    Express a range of number as a collection of bitwise stuff.
+    Express a range of number as a set of bitwise stuff.
+    The number of results is designed to be as few as possible.
     """
 
     def __init__(self, A, B, bits=0):
@@ -191,7 +192,8 @@ class BitwiseRange(object):
 
 class BitwiseIPv4Range(BitwiseRange):
     """
-    Express a range of ipv4 addr as a collection of subnet.
+    Express a range of ipv4 addr as a set of subnet.
+    The number of results is designed to be as few as possible.
     """
 
     def __init__(self, ipA, ipB):
@@ -245,15 +247,10 @@ class BitwiseIPv4Range(BitwiseRange):
 
 
 def test():
-    #r = BitwiseRange(1000, 1999, 16)
-    #r = BitwiseRange(1000, 1999)
-    #r = BitwiseRange(1000, 1001, 16)
-    #r = BitwiseRange(0b000, 0b111, 3)
-    #r.print_result_x()
-    #r.print_result_hex()
-
-    r = BitwiseIPv4Range("10.0.1.0", "10.0.2.100")
-    r.print_result_ipv4()
+    BitwiseRange(0b0100, 0b1110, 4).print_result_x()
+    BitwiseRange(1000, 1999).print_result_x()
+    BitwiseRange(1000, 1999, 16).print_result_hex()
+    BitwiseIPv4Range("10.0.1.0", "10.0.2.100").print_result_ipv4()
 
 
 if __name__ == "__main__":
