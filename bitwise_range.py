@@ -1,8 +1,5 @@
 from __future__ import print_function
 
-import json
-
-
 
 class BitwiseRange(object):
     """
@@ -247,10 +244,12 @@ class BitwiseIPv4Range(BitwiseRange):
 
 
 def test():
-    BitwiseRange(0b0100, 0b1110, 4).print_result_x()
-    BitwiseRange(1000, 1999).print_result_x()
-    BitwiseRange(1000, 1999, 16).print_result_hex()
-    BitwiseIPv4Range("10.0.1.0", "10.0.2.100").print_result_ipv4()
+    #BitwiseRange(0b0100, 0b1110, 4).print_result_x()
+    #BitwiseRange(1000, 1999).print_result_x()
+    #BitwiseRange(1000, 1999, 16).print_result_hex()
+    r = BitwiseIPv4Range("10.0.1.5", "10.0.2.100")
+    r.print_result_x()
+    r.print_result_ipv4()
 
 
 if __name__ == "__main__":
