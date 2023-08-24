@@ -1,6 +1,6 @@
 ## DONATE
 
-Paypal / Alipay: `wangsitan@aliyun.com`
+My [Paypal](https://www.paypal.com/paypalme/wangsitan) / Alipay: `wangsitan@aliyun.com`
 
 # bitwise-range
 
